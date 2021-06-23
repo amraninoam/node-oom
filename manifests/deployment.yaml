@@ -36,25 +36,26 @@ spec:
         volumeMounts:
         - name: heap-dumps
           mountPath: /dumps
-#       - name: ship-heap-dump
-# #        image: uadevnet/alpine-inotify-tools:latest
-#         image: ubuntu
-#         command: ["/bin/sh", "-c"]
-#         args:
-#         - |
-#           apt update &&
-#           apt install inotify-tools -y &&
-#           inotifywait -m /dumps -e close_write | while read DUMPFILE; do echo "file ${DUMPFILE}" ; done
-#         volumeMounts:
-#         - name: heap-dumps
-#           mountPath: /dumps
-#         resources:
-#           requests:
-#             memory: "15Mi"
-#             cpu: 100m
-#           limits:
-#             memory: "1024Mi"
-#             cpu: 2
+      - name: ship-heap-dump
+#        image: uadevnet/alpine-inotify-tools:latest
+        image: ubuntu
+        command: ["/bin/bash", "-c"]
+        args:
+        - |
+          #!/bin/bash
+          apt update &&
+          apt install inotify-tools -y &&
+          inotifywait -m /dumps -e close_write | while read dump_file; do echo "file $dump_file" ; done
+        volumeMounts:
+        - name: heap-dumps
+          mountPath: /dumps
+        resources:
+          requests:
+            memory: "15Mi"
+            cpu: 100m
+          limits:
+            memory: "1024Mi"
+            cpu: 2
       volumes:
       - name: heap-dumps
         persistentVolumeClaim:
