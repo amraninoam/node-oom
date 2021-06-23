@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: node-oom
-        image: noamasela/node-oom:1.6
+        image: noamasela/node-oom:1.8
         ports:
         - containerPort: 8000
         resources:
@@ -26,7 +26,7 @@ spec:
             memory: "15Mi"
             cpu: 100m
           limits:
-            memory: "25Mi"
+            memory: "225Mi"
             cpu: 1
         env:
         - name: NODE_OPTIONS
@@ -37,12 +37,14 @@ spec:
         - name: heap-dumps
           mountPath: /dumps
       - name: ship-heap-dump
-        image: busybox
+#        image: uadevnet/alpine-inotify-tools:latest
+        image: ubuntu
         command: ["/bin/sh", "-c"]
         args:
         - |
-          apk add --no-cache inotify-tools &&
-          inotifywait -m /dumps -e close_write | while read path action file; do cat "$path$file"
+          apt update &&
+          apt install inotify-tools -y &&
+          inotifywait -m /dumps -e close_write | while read DUMPFILE; do echo "file ${DUMPFILE}" ; done
         volumeMounts:
         - name: heap-dumps
           mountPath: /dumps
