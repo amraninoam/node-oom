@@ -31,27 +31,30 @@ spec:
         env:
         - name: NODE_OPTIONS
           value: "--max-old-space-size=22"
+        - name: DUMP_PATH
+          value: "/dumps"
         volumeMounts:
         - name: heap-dumps
           mountPath: /dumps
-      - name: ship-heap-dump
-        image: google/cloud-sdk:206.0.0-alpine
-        command: ["/bin/sh", "-c"]
-        args:
-        - |
-          apk add --no-cache inotify-tools &&
-          gcloud auth activate-service-account --key-file=/secrets/jvm-debug.json &&
-          inotifywait -m /dumps -e close_write | while read path action file; do gsutil cp "$path$file" "gs://heap-dump/$file"; done;
-        volumeMounts:
-        - name: heap-dumps
-          mountPath: /dumps
-        resources:
-          requests:
-            memory: "15Mi"
-            cpu: 100m
-          limits:
-            memory: "1024Mi"
-            cpu: 2
+      # - name: ship-heap-dump
+      #   image: google/cloud-sdk:206.0.0-alpine
+      #   command: ["/bin/sh", "-c"]
+      #   args:
+      #   - |
+      #     apk add --no-cache inotify-tools &&
+      #     gcloud auth activate-service-account --key-file=/secrets/jvm-debug.json &&
+      #     inotifywait -m /dumps -e close_write | while read path action file; do gsutil cp "$path$file" "gs://heap-dump/$file"; done;
+      #   volumeMounts:
+      #   - name: heap-dumps
+      #     mountPath: /dumps
+      #   resources:
+      #     requests:
+      #       memory: "15Mi"
+      #       cpu: 100m
+      #     limits:
+      #       memory: "1024Mi"
+      #       cpu: 2
       volumes:
       - name: heap-dumps
-        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: node-oom-pvc
