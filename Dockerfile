@@ -14,6 +14,6 @@ RUN npm install
 
 # Bundle app source
 COPY . .
-
+# ENV NODE_OPTIONS="--max-old-space-size=30"
 EXPOSE 8000
 CMD [ "node", "index.js" ]

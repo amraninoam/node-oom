@@ -9,6 +9,11 @@ app.listen(8000, function () {
 });
 
 
+let path = require('path');
+require('node-oom-heapdump')({
+    path: path.resolve(__dirname, 'my_heapdump')
+});
+
 const list = [];
 setInterval(()=> {
   const record = new MyRecord();
