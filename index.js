@@ -8,10 +8,9 @@ app.listen(8000, function () {
   console.log('Listening to Port 8000');
 });
 
-const DUMP_PATH = process.env.DUMP_PATH || __dirname
 let path = require('path');
 require('node-oom-heapdump')({
-    path: path.resolve(DUMP_PATH, 'node-dump')
+    path: path.resolve( process.env.DUMP_PATH, 'node-dump')
 });
 
 const list = [];
