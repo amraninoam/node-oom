@@ -18,12 +18,33 @@ spec:
     spec:
       containers:
       - name: node-oom
-        image: noamasela/node-oom:1.0
+        image: noamasela/node-oom:1.6
         ports:
         - containerPort: 8000
         resources:
           requests:
             memory: "15Mi"
+            cpu: 100m
           limits:
-            memory: "20Mi"
+            memory: "130Mi"
             cpu: 1
+        env:
+        - name: NODE_OPTIONS
+          value: "--max-old-space-size=22"
+        volumeMounts:
+        - name: heap-dumps
+          mountPath: /dumps
+      - name: ship-heap-dump
+        image: google/cloud-sdk:206.0.0-alpine
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          apk add --no-cache inotify-tools &&
+          gcloud auth activate-service-account --key-file=/secrets/jvm-debug.json &&
+          inotifywait -m /dumps -e close_write | while read path action file; do gsutil cp "$path$file" "gs://heap-dump/$file"; done;
+        volumeMounts:
+        - name: heap-dumps
+          mountPath: /dumps
+      volumes:
+      - name: heap-dumps
+        emptyDir: {}
